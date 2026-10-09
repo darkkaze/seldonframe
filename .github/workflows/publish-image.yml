@@ -2,7 +2,7 @@
 # `docker compose up` WITHOUT a local build. Triggers on a published
 # GitHub release (tag the app, cut a release) and on manual dispatch.
 #
-# The image is multi-arch (amd64 + arm64) and pushed to
+# The image is linux/amd64, built with the NEXT_PUBLIC_APP_URL repo variable, and pushed to
 # ghcr.io/seldonframe/seldonframe tagged :latest, :sha-<gitsha>, and the
 # release semver (e.g. :1.4.2, :1.4, :1). Auth uses the built-in
 # GITHUB_TOKEN — no PAT, no stored secret.
@@ -66,7 +66,9 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
+          build-args: |
+            NEXT_PUBLIC_APP_URL=${{ vars.NEXT_PUBLIC_APP_URL }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

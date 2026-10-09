@@ -25,11 +25,14 @@ RUN pnpm install --frozen-lockfile
 # `next build` should not need real secrets — pages are dynamic/authed. The
 # placeholders keep any module-load-time env reads happy; NEON_LOCAL_HOST is
 # deliberately unset so the build path matches production (plain neon-http).
+# NEXT_PUBLIC_APP_URL is inlined into the bundle, so it is a build arg:
+#   docker build --build-arg NEXT_PUBLIC_APP_URL=https://crm.example.com .
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 ENV DATABASE_URL=postgres://build:build@127.0.0.1:5432/build \
     AUTH_SECRET=build-only-not-a-real-secret \
     NEXTAUTH_SECRET=build-only-not-a-real-secret \
     ENCRYPTION_KEY=0000000000000000000000000000000000000000000000000000000000000000 \
-    NEXT_PUBLIC_APP_URL=http://localhost:3000
+    NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 RUN pnpm --filter @seldonframe/crm build
 
 # ---------- runner ----------

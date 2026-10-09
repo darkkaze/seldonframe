@@ -22,9 +22,12 @@ import { toInternalRedirectPath } from "@/lib/auth/signup-redirect";
 
 const protectedPrefixes = ["/hub", "/dashboard", "/welcome", "/orgs", "/contacts", "/deals", "/activities", "/forms", "/settings", "/api/v1"];
 const publicPrefixes = ["/api/v1", "/api/auth"];
-const defaultAppHosts = new Set(["app.seldonframe.com", "localhost", "127.0.0.1"]);
+// The app (dashboard) origin. NEXT_PUBLIC_APP_URL is inlined at build time, so
+// a self-hosted image must be built with its own app URL.
+const appOrigin = new URL(process.env.NEXT_PUBLIC_APP_URL?.trim() || "https://app.seldonframe.com");
+const appHostFallback = appOrigin.hostname;
+const defaultAppHosts = new Set(["app.seldonframe.com", "localhost", "127.0.0.1", appHostFallback]);
 const marketingHosts = new Set(["seldonframe.com", "www.seldonframe.com"]);
-const appHostFallback = "app.seldonframe.com";
 // The builder MCP host the /build page's connect snippet + SKILL.md advertise
 // (mirrors SKILL_MD_MCP_URL / MCP_URL — src/lib/build/skill-md.ts,
 // src/components/settings/api-key-manager.tsx). Hardcoded like those two, for
@@ -94,7 +97,7 @@ function resolveWorkspaceAdminRedirect(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
   if (!isAdminPath) return null;
-  const target = new URL("https://app.seldonframe.com/switch-workspace");
+  const target = new URL("/switch-workspace", appOrigin);
   target.searchParams.set("to", orgId);
   target.searchParams.set("next", `${pathname}${search ?? ""}`);
   return target;
