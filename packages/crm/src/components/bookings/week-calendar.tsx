@@ -16,7 +16,7 @@ import type {
   WorkspaceBookingRules,
   AvailabilityDayKey,
 } from "@/lib/bookings/workspace-rules";
-import { toMinutes, weekdayKeys } from "@/lib/bookings/workspace-rules";
+import { toMinutes, weekdayKeys } from "@/lib/bookings/availability-days";
 import { BookingCard } from "@/components/bookings/booking-card";
 import { BookingDatePicker } from "@/components/bookings/booking-date-picker";
 import { CreatePopover } from "@/components/bookings/create-popover";

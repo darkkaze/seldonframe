@@ -24,7 +24,8 @@ import {
   saveAgentTemplateBlueprintAction,
   generateAgentDraftAction,
 } from "@/lib/agent-templates/actions";
-import { deriveName, type AgentSurface } from "@/lib/agent-templates/store";
+import { deriveName } from "@/lib/agent-templates/derive-name";
+import type { AgentSurface } from "@/lib/agent-templates/store";
 
 const PLACEHOLDER =
   "Answer my plumbing company's phone, book jobs, and text customers a quote range…";

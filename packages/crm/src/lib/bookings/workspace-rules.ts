@@ -16,16 +16,14 @@
 // The org-scoped read-modify-write action lives in actions.ts (which IS
 // "use server") to follow the existing auth pattern.
 
-// ── Day/schedule types (canonical home; actions.ts imports these) ────────
+import { toMinutes, weekdayKeys, type AvailabilityDayKey } from "./availability-days";
 
-export type AvailabilityDayKey =
-  | "sunday"
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday";
+// ── Day/schedule types (actions.ts imports these) ────────────────────────
+// The day key, weekday list and toMinutes live in availability-days.ts (no DB
+// access) so client components can import them; re-exported here unchanged.
+
+export type { AvailabilityDayKey } from "./availability-days";
+export { toMinutes, weekdayKeys } from "./availability-days";
 
 export type AvailabilityDaySettings = {
   enabled: boolean;
@@ -34,16 +32,6 @@ export type AvailabilityDaySettings = {
 };
 
 export type AvailabilitySchedule = Record<AvailabilityDayKey, AvailabilityDaySettings>;
-
-export const weekdayKeys: AvailabilityDayKey[] = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
 
 // ── Workspace booking rules ──────────────────────────────────────────────
 
@@ -92,11 +80,6 @@ function normalizeTimeValue(value: unknown, fallback: string): string {
   if (typeof value !== "string") return fallback;
   const trimmed = value.trim();
   return HHMM_RE.test(trimmed) ? trimmed : fallback;
-}
-
-export function toMinutes(value: string): number {
-  const [hours, minutes] = value.split(":").map(Number);
-  return hours * 60 + minutes;
 }
 
 // v1.36.4 short-key fallback — pre-1.36.4 some rows stored availability with
