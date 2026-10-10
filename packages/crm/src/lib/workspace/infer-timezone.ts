@@ -306,8 +306,8 @@ export function resolveStateCode(input: string | null | undefined): string | nul
 /**
  * Resolve an IANA timezone string from any of: explicit state code,
  * a state name, a city name, or a free-text description that
- * mentions any of the above. Returns null when no match — caller
- * decides the fallback (usually "UTC").
+ * mentions any of the above. Returns null when no match — callers
+ * fall back to defaultTimezone().
  *
  * Examples:
  *   inferTimezone("CA") → "America/Los_Angeles"
@@ -322,4 +322,13 @@ export function inferTimezone(...inputs: Array<string | null | undefined>): stri
     if (code) return STATE_TIMEZONES[code] ?? null;
   }
   return null;
+}
+
+/**
+ * Timezone used when inferTimezone() can't resolve one: the
+ * DEFAULT_TIMEZONE env var (IANA name, e.g. "America/Mexico_City"),
+ * else "UTC". The operator can override per workspace in settings.
+ */
+export function defaultTimezone(): string {
+  return process.env.DEFAULT_TIMEZONE?.trim() || "UTC";
 }

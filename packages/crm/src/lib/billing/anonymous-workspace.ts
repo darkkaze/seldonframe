@@ -16,7 +16,7 @@ import { trackEvent } from "@/lib/analytics/track";
 import { captureServerEvent } from "@/lib/analytics/capture";
 import { classifyBusinessTypeFromSoul } from "@/lib/page-schema/classify-business";
 import { selectCRMPersonality } from "@/lib/crm/personality";
-import { inferTimezone } from "@/lib/workspace/infer-timezone";
+import { defaultTimezone, inferTimezone } from "@/lib/workspace/infer-timezone";
 
 const DEFAULT_ENABLED_BLOCKS = [
   "crm",
@@ -61,6 +61,12 @@ export type AnonymousCreateInput = {
    */
   city?: string | null;
   state?: string | null;
+  /**
+   * Already-resolved IANA timezone. When set it is stored as-is and the
+   * city/state inference below is skipped, so a caller that validates the
+   * timezone afterwards (createFullWorkspace) checks the value it chose.
+   */
+  timezone?: string | null;
   services?: Array<{ name: string; description?: string | null }> | null;
   testimonials?: Array<{
     quote: string;
@@ -205,9 +211,10 @@ export async function createAnonymousWorkspace(
   // address/business_description so the booking page renders the
   // operator's actual hours (Pacific Coast Heating in San Diego ⇒
   // America/Los_Angeles, not the visitor's browser TZ). Falls back
-  // to UTC when nothing resolves — the operator can override via
-  // /settings/workspace.
+  // to defaultTimezone() when nothing resolves — the operator can
+  // override via /settings/workspace.
   const inferredTimezone =
+    input.timezone ??
     inferTimezone(
       input.state ?? null,
       input.city ?? null,
@@ -215,7 +222,8 @@ export async function createAnonymousWorkspace(
       input.address ?? null,
       input.description ?? null,
       input.source ?? null,
-    ) ?? "UTC";
+    ) ??
+    defaultTimezone();
 
   const [org] = await db
     .insert(organizations)

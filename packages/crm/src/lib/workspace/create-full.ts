@@ -31,7 +31,7 @@ import { createAnonymousWorkspace } from "@/lib/billing/anonymous-workspace";
 import { selectCRMPersonality } from "@/lib/crm/personality";
 import { resolvePersonalityForBusiness } from "@/lib/crm/personality-generator";
 import { classifyBusinessTypeFromSoul } from "@/lib/page-schema/classify-business";
-import { inferTimezone } from "@/lib/workspace/infer-timezone";
+import { defaultTimezone, inferTimezone } from "@/lib/workspace/infer-timezone";
 import { trackEvent } from "@/lib/analytics/track";
 import { buildWorkspaceCreatedEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
 import type { AestheticArchetypeId } from "@/lib/workspace/aesthetic-archetypes";
@@ -281,7 +281,7 @@ export async function createFullWorkspace(
       input.city,
       `${input.city}, ${stateCode}`,
       input.business_description,
-    ) ?? "America/New_York";
+    ) ?? defaultTimezone();
 
   // Steps 5-12: createAnonymousWorkspace already orchestrates this
   // sequence atomically (org INSERT → token mint → pipeline +
@@ -320,6 +320,7 @@ export async function createFullWorkspace(
       address: input.address ?? null,
       city: input.city,
       state: stateCode,
+      timezone,
       tagline: null,
       description: input.business_description,
       // v1.3.3 — when the LLM personality includes services_enrichment,
