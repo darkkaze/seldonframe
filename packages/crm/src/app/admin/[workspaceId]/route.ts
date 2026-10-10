@@ -5,6 +5,7 @@ import {
   ACTIVE_ORG_COOKIE,
   ADMIN_TOKEN_COOKIE_MAX_AGE,
 } from "@/lib/auth/admin-token";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 /**
  * GET /admin/[workspaceId]?token=wst_…
@@ -50,25 +51,25 @@ export async function GET(
     // Most operators landing here without a token mistyped the URL or
     // followed a stale bookmark; sending them to a help page is kinder
     // than a raw error.
-    return NextResponse.redirect(new URL("/admin/invalid?reason=missing-token", url.origin));
+    return NextResponse.redirect(new URL("/admin/invalid?reason=missing-token", publicOrigin(request)));
   }
 
   const validated = await validateRawWorkspaceToken(token);
   if (!validated) {
-    return NextResponse.redirect(new URL("/admin/invalid?reason=expired-or-unknown", url.origin));
+    return NextResponse.redirect(new URL("/admin/invalid?reason=expired-or-unknown", publicOrigin(request)));
   }
 
   if (validated.orgId !== workspaceId) {
     // Token resolves but to a different workspace — refuse rather than
     // silently switch context. This protects against "wrong link"
     // user-error AND a (hypothetical) confusion attack.
-    return NextResponse.redirect(new URL("/admin/invalid?reason=workspace-mismatch", url.origin));
+    return NextResponse.redirect(new URL("/admin/invalid?reason=workspace-mismatch", publicOrigin(request)));
   }
 
   // Bounce to /dashboard with the cookies set. We use 303 (See Other)
   // to make sure the browser issues a GET on the redirect target —
   // important because some legacy bots resubmit the original method.
-  const dashboard = new URL("/dashboard", url.origin);
+  const dashboard = new URL("/dashboard", publicOrigin(request));
   const response = NextResponse.redirect(dashboard, 303);
 
   response.cookies.set(ADMIN_TOKEN_COOKIE, token, {

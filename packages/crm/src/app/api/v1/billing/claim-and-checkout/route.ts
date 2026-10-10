@@ -13,6 +13,7 @@ import {
   tierFromBasePriceId,
 } from "@/lib/billing/checkout-items";
 import type { TierId } from "@/lib/billing/plans";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 /**
  * POST /api/v1/billing/claim-and-checkout
@@ -66,7 +67,7 @@ function normalizeReturnPath(value: unknown, fallback: string) {
 
 function getRequestOrigin(req: NextRequest) {
   try {
-    return new URL(req.url).origin;
+    return publicOrigin(req);
   } catch {
     return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   }

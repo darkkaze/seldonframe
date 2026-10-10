@@ -30,6 +30,7 @@ import { captureServerEvent } from "@/lib/analytics/capture";
 import { sendGa4Event } from "@/lib/analytics/ga4";
 import { parseInternalIds } from "@/lib/super-admin/internal-exclusion";
 import { buildCheckoutStartedEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 const CHECKOUT_SOURCES = new Set(["pricing", "signup_resume", "upgrade_modal"]);
 
@@ -78,7 +79,7 @@ function resolveUserIdFromSeldonApiKey(headers: Headers): string | null {
 
 function getRequestOrigin(req: NextRequest) {
   try {
-    return new URL(req.url).origin;
+    return publicOrigin(req);
   } catch {
     return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   }

@@ -50,6 +50,7 @@ import {
   type BridgeResult,
 } from "@/lib/build/mcp/build-mcp-handler";
 import type { BuildToolName } from "@/lib/build/mcp/build-mcp-rpc";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 // CORS: an MCP client (an IDE agent) may run in a browser-hosted extension or
 // a local CLI process. The endpoint is bearer-gated (unlike the public
@@ -108,7 +109,7 @@ export async function GET() {
 function buildRealBridge(request: Request): BuildMcpDeps["bridge"] {
   const authorization = request.headers.get("authorization") ?? "";
   return async (tool: BuildToolName, body: Record<string, unknown>): Promise<BridgeResult> => {
-    const url = new URL(`/api/v1/build/${tool}`, request.url);
+    const url = new URL(`/api/v1/build/${tool}`, publicOrigin(request));
     const response = await fetch(url, {
       method: "POST",
       headers: {

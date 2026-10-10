@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { consumeOperatorMagicLink } from "@/lib/operator-portal/auth";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 export async function GET(
   request: NextRequest,
@@ -19,14 +20,14 @@ export async function GET(
 
   if (!token) {
     return NextResponse.redirect(
-      new URL(`/portal/${orgSlug}/login?error=missing_magic_link`, request.url),
+      new URL(`/portal/${orgSlug}/login?error=missing_magic_link`, publicOrigin(request)),
     );
   }
 
   const result = await consumeOperatorMagicLink({ orgSlug, token });
   if (!result.ok) {
     return NextResponse.redirect(
-      new URL(`/portal/${orgSlug}/login?error=invalid_magic_link`, request.url),
+      new URL(`/portal/${orgSlug}/login?error=invalid_magic_link`, publicOrigin(request)),
     );
   }
 
@@ -36,5 +37,5 @@ export async function GET(
   // launched. An explicit ?redirect= (relative) still wins.
   const target =
     redirectTo && redirectTo.startsWith("/") ? redirectTo : `/portal/${orgSlug}`;
-  return NextResponse.redirect(new URL(target, request.url));
+  return NextResponse.redirect(new URL(target, publicOrigin(request)));
 }

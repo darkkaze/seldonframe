@@ -19,6 +19,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { establishPortalDemoSession } from "@/lib/portal/auth";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 /** Pure target resolver — given the result of establishPortalDemoSession,
  *  decide where the route should redirect. Extracted so the routing
@@ -58,11 +59,11 @@ export async function GET(
     console.warn(
       `[demo-login] unexpected error for slug=${orgSlug}: ${err instanceof Error ? err.message : String(err)}`,
     );
-    return NextResponse.redirect(new URL(`/customer/${orgSlug}/login?error=demo_unavailable`, request.url));
+    return NextResponse.redirect(new URL(`/customer/${orgSlug}/login?error=demo_unavailable`, publicOrigin(request)));
   }
 
   if (result.ok) {
-    return NextResponse.redirect(new URL(result.redirectTo, request.url));
+    return NextResponse.redirect(new URL(result.redirectTo, publicOrigin(request)));
   }
 
   if (result.reason === "org_not_found") {
@@ -76,5 +77,5 @@ export async function GET(
   // no_demo_contact — fall back to /login. The customer portal's
   // magic-link flow still works on this workspace; the operator just
   // can't one-click demo it.
-  return NextResponse.redirect(new URL(`/customer/${orgSlug}/login`, request.url));
+  return NextResponse.redirect(new URL(`/customer/${orgSlug}/login`, publicOrigin(request)));
 }

@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { consumeAgencySupportSession } from "@/lib/operator-portal/support-session";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 export async function GET(
   request: NextRequest,
@@ -36,5 +37,5 @@ export async function GET(
     );
   }
 
-  return NextResponse.redirect(new URL(result.redirectTo, request.url));
+  return NextResponse.redirect(new URL(result.redirectTo, publicOrigin(request)));
 }

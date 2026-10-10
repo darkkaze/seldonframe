@@ -20,6 +20,7 @@
 
 import { NextResponse } from "next/server";
 import { forkListingIntoNewWorkspace, buildRealForkListingDeps } from "@/lib/marketplace/fork-listing";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 function resolveRequestIp(headers: Headers): string {
   const forwarded = headers.get("x-forwarded-for");
@@ -51,13 +52,13 @@ export async function POST(request: Request) {
   } catch {
     // Malformed body — no slug to redirect back to a specific listing, so
     // send the visitor to the marketplace root with the error flag.
-    const fallback = new URL("/marketplace", url.origin);
+    const fallback = new URL("/marketplace", publicOrigin(request));
     fallback.searchParams.set("fork_error", "invalid_request");
     return NextResponse.redirect(fallback, 303);
   }
 
   if (!slug) {
-    const fallback = new URL("/marketplace", url.origin);
+    const fallback = new URL("/marketplace", publicOrigin(request));
     fallback.searchParams.set("fork_error", "missing_slug");
     return NextResponse.redirect(fallback, 303);
   }
@@ -65,12 +66,12 @@ export async function POST(request: Request) {
   try {
     const result = await forkListingIntoNewWorkspace({ slug, ip }, buildRealForkListingDeps());
     if (!result.ok) {
-      return backToListing(url.origin, slug, result.reason);
+      return backToListing(publicOrigin(request), slug, result.reason);
     }
     return NextResponse.redirect(result.adminUrl, 303);
   } catch {
     // Fail closed — never leak an internal error, never a raw 500 for this
     // form flow. The listing page's ?fork_error notice covers it generically.
-    return backToListing(url.origin, slug, "Something went wrong — please try again.");
+    return backToListing(publicOrigin(request), slug, "Something went wrong — please try again.");
   }
 }

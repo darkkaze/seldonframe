@@ -3,6 +3,7 @@ import { and, eq, isNull, or } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { orgMembers, organizations, partnerAgencies, users } from "@/db/schema";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 // Server-side org switcher driven by `?to=<orgId>&next=<path>`.
 //
@@ -46,12 +47,12 @@ export async function GET(request: Request) {
   const next = sanitizeNext(rawNext);
 
   if (!targetOrgId) {
-    return NextResponse.redirect(new URL(next, url.origin));
+    return NextResponse.redirect(new URL(next, publicOrigin(request)));
   }
 
   const session = await auth();
   if (!session?.user?.id) {
-    const loginUrl = new URL("/login", url.origin);
+    const loginUrl = new URL("/login", publicOrigin(request));
     loginUrl.searchParams.set(
       "next",
       `/switch-workspace?to=${encodeURIComponent(targetOrgId)}&next=${encodeURIComponent(next)}`
@@ -61,10 +62,10 @@ export async function GET(request: Request) {
 
   const access = await checkWorkspaceAccess(session.user.id, targetOrgId);
   if (!access.allowed) {
-    return NextResponse.redirect(new URL("/dashboard?switch=denied", url.origin));
+    return NextResponse.redirect(new URL("/dashboard?switch=denied", publicOrigin(request)));
   }
 
-  const response = NextResponse.redirect(new URL(next, url.origin));
+  const response = NextResponse.redirect(new URL(next, publicOrigin(request)));
   response.cookies.set(COOKIE_NAME, targetOrgId, COOKIE_OPTIONS);
   return response;
 }

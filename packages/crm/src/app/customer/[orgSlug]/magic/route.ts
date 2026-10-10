@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { establishPortalMagicSession } from "@/lib/portal/auth";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 export async function GET(
   request: NextRequest,
@@ -10,7 +11,7 @@ export async function GET(
   const redirectTo = request.nextUrl.searchParams.get("redirect");
 
   if (!token) {
-    return NextResponse.redirect(new URL(`/customer/${orgSlug}/login?error=missing_magic_link`, request.url));
+    return NextResponse.redirect(new URL(`/customer/${orgSlug}/login?error=missing_magic_link`, publicOrigin(request)));
   }
 
   try {
@@ -20,8 +21,8 @@ export async function GET(
       redirectTo,
     });
 
-    return NextResponse.redirect(new URL(result.redirectTo, request.url));
+    return NextResponse.redirect(new URL(result.redirectTo, publicOrigin(request)));
   } catch {
-    return NextResponse.redirect(new URL(`/customer/${orgSlug}/login?error=invalid_magic_link`, request.url));
+    return NextResponse.redirect(new URL(`/customer/${orgSlug}/login?error=invalid_magic_link`, publicOrigin(request)));
   }
 }

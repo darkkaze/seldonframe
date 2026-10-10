@@ -12,6 +12,7 @@ import { exchangeCode } from "@/lib/agents/mcp/oauth";
 import { discoverVettedToolsLive } from "@/lib/agents/mcp/discover-vetted-tools";
 import { MCP_OAUTH_COOKIE } from "@/lib/agents/mcp/oauth-state-cookie";
 import { handleMcpOauthCallback } from "@/lib/agents/mcp/oauth-callback";
+import { publicOrigin } from "@/lib/http/public-origin";
 
 export const runtime = "nodejs";
 
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     },
   );
 
-  const response = NextResponse.redirect(new URL(result.redirect, request.url));
+  const response = NextResponse.redirect(new URL(result.redirect, publicOrigin(request)));
   if (result.clearCookie) {
     response.cookies.delete(MCP_OAUTH_COOKIE);
   }
