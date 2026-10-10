@@ -138,29 +138,22 @@ export async function applyTemplateGeneralizationAction(input: {
         }));
       },
       persist: async ({ templateId, nextBlueprint, deploymentUpdates }) => {
-        // The neon-http driver has NO `db.transaction` support (it throws "No
-        // transactions support in neon-http driver" — verified against the
-        // installed drizzle-orm version). `db.batch([...])` is neon-http's
-        // atomic multi-statement primitive (it sends the whole array as ONE
-        // transaction over Neon's HTTP endpoint) — this is what makes the
-        // blueprint rewrite + every author-deployment back-fill land as a
-        // single all-or-nothing unit, per the never-lies contract.
-        const templateUpdate = db
-          .update(agentTemplates)
-          .set({ blueprint: nextBlueprint, updatedAt: new Date() })
-          .where(eq(agentTemplates.id, templateId));
+        // One transaction makes the blueprint rewrite + every author-deployment
+        // back-fill land as a single all-or-nothing unit, per the never-lies
+        // contract.
+        await db.transaction(async (tx) => {
+          await tx
+            .update(agentTemplates)
+            .set({ blueprint: nextBlueprint, updatedAt: new Date() })
+            .where(eq(agentTemplates.id, templateId));
 
-        const deploymentQueries = deploymentUpdates.map((update) =>
-          db
-            .update(deployments)
-            .set({ customization: update.customization, updatedAt: new Date() })
-            .where(eq(deployments.id, update.id)),
-        );
-
-        await db.batch([templateUpdate, ...deploymentQueries] as [
-          typeof templateUpdate,
-          ...typeof deploymentQueries,
-        ]);
+          for (const update of deploymentUpdates) {
+            await tx
+              .update(deployments)
+              .set({ customization: update.customization, updatedAt: new Date() })
+              .where(eq(deployments.id, update.id));
+          }
+        });
       },
     },
     { templateId, orgId: auth.orgId, rows: input.rows ?? [] },
