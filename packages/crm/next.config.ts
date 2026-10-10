@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: ["localhost", "127.0.0.1", "127.0.0.1:54345"],
     },
+    // Self-hosted behind a reverse proxy: build request.url from the Host
+    // header instead of the server's own hostname:port (`next start`
+    // otherwise yields https://localhost:3000 in route handlers, so their
+    // redirects leave the public domain).
+    // @ts-expect-error -- read by next-server but missing from NextConfig's types.
+    trustHostHeader: true,
   },
   // v1.38.4 — allowlist Unsplash domains for next/image. Without this,
   // any <Image src="https://images.unsplash.com/..."> silently fails
