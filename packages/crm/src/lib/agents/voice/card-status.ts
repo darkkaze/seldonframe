@@ -15,7 +15,7 @@
 // this workspace's agent. Surfacing "no_number" tells the operator the one
 // missing step.
 
-import { toE164 } from "@/lib/sms/providers";
+import { toE164 } from "@/lib/sms/providers/interface";
 
 // The OpenAI Realtime TTS voices the editor offers. Lives here (a plain module),
 // NOT in actions.ts — a "use server" file may only export async functions, so a
