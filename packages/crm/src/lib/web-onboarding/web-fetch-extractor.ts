@@ -37,6 +37,7 @@ import {
   type ExtractedBusinessFacts,
 } from "./extraction-prompt";
 import { parseExtraction } from "./extraction-parser";
+import { resolveModel } from "@/lib/ai/models";
 
 export type WebFetchErrorReason =
   | "extraction_failed"
@@ -162,7 +163,7 @@ export async function extractBusinessFactsFromUrl(params: {
   let response: { content: Array<AnthropicContentBlock>; stop_reason?: string };
   try {
     response = await client.messages.create({
-      model: modelInUse,
+      model: resolveModel(modelInUse),
       max_tokens: MAX_TOKENS,
       // System prompt = strongest format/role constraint Anthropic offers.
       // Vercel logs showed every URL failing because Claude was outputting

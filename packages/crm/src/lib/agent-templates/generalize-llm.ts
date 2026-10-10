@@ -13,6 +13,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/ai/client";
 import type { GeneralizationLlm, ProposedSubstitution } from "./generalize";
+import { resolveModel } from "@/lib/ai/models";
 
 export const DEFAULT_GENERALIZATION_MODEL = "claude-haiku-4-5";
 
@@ -85,7 +86,7 @@ export function makeGeneralizationLlm(
     const model = process.env.ANTHROPIC_EVAL_MODEL?.trim() || DEFAULT_GENERALIZATION_MODEL;
 
     const resp = await client.messages.create({
-      model,
+      model: resolveModel(model),
       max_tokens: MAX_TOKENS,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: customSkillMd }],

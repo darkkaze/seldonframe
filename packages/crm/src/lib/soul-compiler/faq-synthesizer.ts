@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { createByokAnthropicClient } from "./anthropic";
 import { readSkillPack } from "@/lib/skill-packs/reader";
-import { DEFAULT_SONNET_MODEL } from "@/lib/ai/models";
+import { DEFAULT_SONNET_MODEL, resolveModel } from "@/lib/ai/models";
 import type { SoulV4 } from "./schema";
 
 const SKILL_PACK_PATH = path.join(
@@ -84,7 +84,7 @@ export async function synthesizeFaqsFromSoul(args: SynthesizerArgs): Promise<Syn
     .replace("{{EXISTING_FAQS}}", formatExistingFaqs(args.existingFaqs));
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: resolveModel(MODEL),
     max_tokens: MAX_TOKENS,
     messages: [{ role: "user", content: userMessage }],
   });

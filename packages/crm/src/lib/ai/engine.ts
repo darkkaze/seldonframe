@@ -1,6 +1,7 @@
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages";
 import { getAnthropicClient } from "@/lib/ai/client";
 import { customizationToolDefinitions } from "./tool-definitions";
+import { resolveModel } from "@/lib/ai/models";
 
 type ToolUseBlock = {
   type: "tool_use";
@@ -77,7 +78,7 @@ export async function runClaudeWithCustomizationTools(prompt: string) {
   }
 
   const response = await client.messages.create({
-    model: "claude-3-5-sonnet-latest",
+    model: resolveModel("claude-3-5-sonnet-latest"),
     max_tokens: 1200,
     messages: [{ role: "user", content: prompt }],
     tools: customizationToolDefinitions,
@@ -103,7 +104,7 @@ export async function runClaudeWithCustomizationTools(prompt: string) {
   });
 
   const followup = await client.messages.create({
-    model: "claude-3-5-sonnet-latest",
+    model: resolveModel("claude-3-5-sonnet-latest"),
     max_tokens: 1200,
     messages: [
       { role: "user", content: prompt },

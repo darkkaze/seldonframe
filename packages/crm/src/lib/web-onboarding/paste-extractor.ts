@@ -16,6 +16,7 @@ import { EXTRACTION_INSTRUCTIONS_MD, type ExtractedBusinessFacts } from "./extra
 import { parseExtraction } from "./extraction-parser";
 import { mapAnthropicSdkError } from "./anthropic-error-map";
 import { WebFetchError } from "./web-fetch-extractor";
+import { resolveModel } from "@/lib/ai/models";
 
 // Mirrors the AnthropicLike shim used in markdown-extractor.ts — narrows the
 // SDK's full Message return type to only the fields we use, avoiding the
@@ -83,7 +84,7 @@ export async function extractBusinessFactsFromPaste(args: {
   let response: { content: Array<AnthropicContentBlock>; stop_reason?: string | null };
   try {
     response = await client.messages.create({
-      model: modelInUse,
+      model: resolveModel(modelInUse),
       max_tokens: MAX_TOKENS,
       system: SYSTEM_PROMPT,
       messages: [

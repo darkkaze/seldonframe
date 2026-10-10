@@ -9,6 +9,7 @@ import {
 import { getAIClient } from "@/lib/ai/client";
 import { emitSeldonEvent } from "@/lib/events/bus";
 import type { OrgSoul } from "@/lib/soul/types";
+import { resolveModel } from "@/lib/ai/models";
 
 // The Conversation Primitive runtime is channel-agnostic: email in Phase 3,
 // SMS in Phase 4 (and chat widget later) all route through this module.
@@ -208,7 +209,7 @@ async function generateResponse(params: {
 
   try {
     const response = await resolution.client.messages.create({
-      model: "claude-haiku-4-5",
+      model: resolveModel("claude-haiku-4-5"),
       max_tokens: RESPONSE_MAX_TOKENS,
       system: params.systemPrompt,
       messages: toAnthropicMessages(params.turns, params.incoming),

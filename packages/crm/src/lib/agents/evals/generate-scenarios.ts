@@ -37,6 +37,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/ai/client";
 import type { AgentBlueprint } from "@/db/schema/agents";
 import type { EvalScenario } from "./eval-types";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── the generator seam ──────────────────────────────────────────────────────
 
@@ -393,7 +394,7 @@ export function makeLlmScenarioGenerator(
       const userContent = `Agent: ${JSON.stringify(compactBlueprintForGenerator(blueprint))}`;
 
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: SCENARIO_MAX_TOKENS,
         system: GENERATOR_SYSTEM,
         messages: [{ role: "user", content: userContent }],

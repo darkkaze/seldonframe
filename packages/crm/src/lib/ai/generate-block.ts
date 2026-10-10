@@ -1,6 +1,6 @@
 import { getAnthropicClient } from "@/lib/ai/client";
 import { assembleBlockContext } from "@/lib/ai/context";
-import { DEFAULT_SONNET_MODEL } from "@/lib/ai/models";
+import { DEFAULT_SONNET_MODEL, resolveModel } from "@/lib/ai/models";
 import { validateMigrationSQL } from "@/lib/db/migration-safety";
 import { generateMarketplaceBlockCodeFromBlockMd, type GeneratedBlockCode } from "@/lib/marketplace/actions";
 import { db } from "@/db";
@@ -205,7 +205,7 @@ export async function generateClarifyingQuestions(input: {
   }
 
   const response = await client.messages.create({
-    model: SELDON_MODEL,
+    model: resolveModel(SELDON_MODEL),
     max_tokens: 700,
     messages: [
       {
@@ -284,7 +284,7 @@ export async function decomposeRequest(description: string, enrichedDescription?
   }
 
   const response = await client.messages.create({
-    model: SELDON_MODEL,
+    model: resolveModel(SELDON_MODEL),
     max_tokens: 800,
     messages: [
       {
@@ -326,7 +326,7 @@ async function scoreInventoryMatch(params: {
   }
 
   const response = await client.messages.create({
-    model: SELDON_MODEL,
+    model: resolveModel(SELDON_MODEL),
     max_tokens: 500,
     messages: [
       {
@@ -419,7 +419,7 @@ export async function descriptionToBlockMd(orgId: string, description: string): 
   }
 
   const response = await client.messages.create({
-    model: SELDON_MODEL,
+    model: resolveModel(SELDON_MODEL),
     max_tokens: 6000,
     system: `You are creating a BLOCK.md specification for SeldonFrame. Output only valid BLOCK.md content and keep it concise (max 180 lines).\n\nWhen the user asks for multiple connected things (e.g., "build me an onboarding flow with intake form, welcome sequence, and booking page"), create ALL of them in a single response. Connect them as one cohesive workflow.\n\nUse this default BLOCK.md template as the baseline structure for every new block:\n${DEFAULT_BLOCK_TEMPLATE}\n\nRequirements:\n- Fill the template with concrete, high-signal details rather than placeholders\n- Keep behavior specific, actionable, and tied to business outcomes\n- Integration Points must list the connected systems actually involved\n- Keep event names lowercase entity.action when events are referenced\n- Apply the Karpathy Guidelines in the substance of the block, not as decoration\n- Make the output previewable and reusable as a portable BLOCK.md package\n\nYou have access to this organization's soul:\n- Business type: {{soul.entity.type}}\n- Contact label: {{soul.entity.contactLabel}}\n- Voice: {{soul.voice.tone}}, {{soul.voice.personality}}\n- Services: {{soul.services}}\n- Pipeline: {{soul.journey.stages}}\n\nWhen creating resources, use these to set smart defaults:\n- Email tone matches soul.voice\n- Form fields are relevant to soul.entity.type\n- Booking durations match soul.services\n- Automation triggers align with soul.journey.stages\n- All {{variable}} placeholders use the soul's labels\n\nThe user should NOT have to specify that their booking is 30 minutes or their welcome email should sound warm — the soul already knows this. Use it.\n\n${context}`,
     messages: [{ role: "user", content: source }],
@@ -428,7 +428,7 @@ export async function descriptionToBlockMd(orgId: string, description: string): 
   const blockMd = extractText(response.content as Array<{ type: string; text?: string }>) || fallbackBlockMd(source);
 
   const summaryResponse = await client.messages.create({
-    model: SELDON_MODEL,
+    model: resolveModel(SELDON_MODEL),
     max_tokens: 280,
     messages: [
       {
@@ -459,7 +459,7 @@ async function customizeInventoryBlockMd(params: {
   }
 
   const response = await client.messages.create({
-    model: SELDON_MODEL,
+    model: resolveModel(SELDON_MODEL),
     max_tokens: 3500,
     system: `Customize an existing BLOCK.md with minimal diffs. Preserve reliable specifics, but normalize the output toward this default template when possible. Keep output under 150 lines. Output only BLOCK.md.\n\nDefault template:\n${DEFAULT_BLOCK_TEMPLATE}\n\nRules:\n- Keep changes surgical
 - Preserve the block's proven business logic and integrations

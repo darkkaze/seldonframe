@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { organizations } from "@/db/schema";
 import { getAIClient, recordSeldonUsage } from "@/lib/ai/client";
-import { DEFAULT_SONNET_MODEL } from "@/lib/ai/models";
+import { DEFAULT_SONNET_MODEL, resolveModel } from "@/lib/ai/models";
 import { getCurrentUser, getOrgId } from "@/lib/auth/helpers";
 import type { FrameworkConfig } from "@/lib/soul/install";
 
@@ -513,7 +513,7 @@ Business name: ${businessName || "Not provided"}`;
 
   try {
     const response = await aiResolution.client.messages.create({
-      model: process.env.SELDON_MODEL?.trim() || DEFAULT_SONNET_MODEL,
+      model: resolveModel(process.env.SELDON_MODEL?.trim() || DEFAULT_SONNET_MODEL),
       max_tokens: 2200,
       temperature: 0.4,
       messages: [{ role: "user", content: prompt }],

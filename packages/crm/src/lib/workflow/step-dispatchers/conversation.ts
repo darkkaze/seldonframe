@@ -38,6 +38,7 @@ import type { NextAction, RuntimeContext, StoredRun } from "../types";
 // open slots instead of just asking "what time works?" The handler
 // table is shared with mcp_tool_call steps; same orgId-bound invoker.
 import { makeAgentToolInvoker } from "@/lib/agents/tool-invoker";
+import { resolveModel } from "@/lib/ai/models";
 
 // 2026-05-18 — final placeholder interpolation before sending the
 // initial/reply message. The synthesizer fills $placeholders at
@@ -342,7 +343,7 @@ async function callLLM(
   try {
     for (let iter = 0; iter < MAX_TOOL_ITERS; iter += 1) {
       const response = await ai.client.messages.create({
-        model: "claude-sonnet-4-5",
+        model: resolveModel("claude-sonnet-4-5"),
         max_tokens: 800,
         system: systemPrompt,
         tools: AGENT_TOOLS as never,

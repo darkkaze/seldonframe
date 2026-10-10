@@ -32,6 +32,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/ai/client";
 import type { SimCustomerReply } from "./run-scenario";
 import type { EvalScenario, EvalTurn } from "./eval-types";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── model + budget ──────────────────────────────────────────────────────────
 
@@ -179,7 +180,7 @@ export function makeLlmCustomerSim(
       ].join("\n\n");
 
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: SIM_MAX_TOKENS,
         system: SIM_SYSTEM,
         messages: [{ role: "user", content: userContent }],

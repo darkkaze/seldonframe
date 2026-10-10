@@ -23,6 +23,7 @@
 // it actually ran — the copilot's reply is never held hostage by this.
 
 import Anthropic from "@anthropic-ai/sdk";
+import { resolveModel } from "@/lib/ai/models";
 
 export type RenderResult =
   | { ok: true; base64: string; mediaType: string }
@@ -130,7 +131,7 @@ export async function gradeScreenshot(
 
     const prompt = buildVisionGradePrompt(goal, rubric);
     const response = await client.messages.create({
-      model: VISION_MODEL,
+      model: resolveModel(VISION_MODEL),
       max_tokens: 512,
       messages: [
         {

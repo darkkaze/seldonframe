@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ZodError } from "zod";
 import { routingResultSchema, soulV4Schema, type RoutingResult, type SoulV4 } from "@/lib/soul-compiler/schema";
-import { DEFAULT_SONNET_MODEL } from "@/lib/ai/models";
+import { DEFAULT_SONNET_MODEL, resolveModel } from "@/lib/ai/models";
 
 const DEFAULT_MODEL = process.env.SOUL_COMPILER_MODEL?.trim() || DEFAULT_SONNET_MODEL;
 const ROUTING_MAX_TOKENS = 1200;
@@ -488,7 +488,7 @@ export async function runRoutingCall(params: {
   model?: string;
 }) {
   const response = await params.client.messages.create({
-    model: params.model || DEFAULT_MODEL,
+    model: resolveModel(params.model || DEFAULT_MODEL),
     max_tokens: ROUTING_MAX_TOKENS,
     system: routingSystemPrompt,
     messages: [
@@ -527,7 +527,7 @@ async function runExtractionCall(params: {
     : "";
 
   const response = await params.client.messages.create({
-    model: params.model || DEFAULT_MODEL,
+    model: resolveModel(params.model || DEFAULT_MODEL),
     max_tokens: EXTRACTION_MAX_TOKENS,
     system: soulCompilerSystemPrompt,
     messages: [

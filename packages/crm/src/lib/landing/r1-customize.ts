@@ -19,6 +19,7 @@ import { landingPages, landingPayloadVersions, organizations } from "@/db/schema
 import type { AestheticArchetypeId } from "@/lib/workspace/aesthetic-archetypes";
 import { buildR1CustomizeMessages } from "./r1-customize-prompt";
 import type { R1LandingPayload } from "./r1-payload-prompt";
+import { resolveModel } from "@/lib/ai/models";
 
 const DEFAULT_MODEL =
   process.env.LANDING_PAYLOAD_MODEL?.trim() || "claude-haiku-4-5";
@@ -223,7 +224,7 @@ export async function customizeLandingR1(args: {
   let stopReason: string | null = null;
   try {
     const response = await client.messages.create({
-      model: DEFAULT_MODEL,
+      model: resolveModel(DEFAULT_MODEL),
       max_tokens: MAX_TOKENS,
       system,
       messages: [{ role: "user", content: userMessage }],

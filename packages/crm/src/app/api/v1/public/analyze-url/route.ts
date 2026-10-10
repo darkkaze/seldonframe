@@ -7,7 +7,7 @@ import { demoApiBlockedResponse, isDemoReadonly } from "@/lib/demo/server";
 import { fetchPublicUrlSafe, SsrfBlockedError } from "@/lib/security/ssrf-guard";
 import { checkRateLimit } from "@/lib/utils/rate-limit";
 import { withUrlExtractionCache } from "@/lib/web-build/cached-extraction";
-import { DEFAULT_SONNET_MODEL } from "@/lib/ai/models";
+import { DEFAULT_SONNET_MODEL, resolveModel } from "@/lib/ai/models";
 
 type DetectedTool = { name: string; slug: string; icon: string; autoConnect: boolean };
 
@@ -319,7 +319,7 @@ async function extractBusinessData(markdown: string, url: string): Promise<Extra
 
   try {
     const response = await anthropic.messages.create({
-      model: DEFAULT_SONNET_MODEL,
+      model: resolveModel(DEFAULT_SONNET_MODEL),
       max_tokens: 2048,
       system: [
         { type: "text", text: EXTRACTION_SYSTEM_STATIC, cache_control: { type: "ephemeral" } },
@@ -332,7 +332,8 @@ async function extractBusinessData(markdown: string, url: string): Promise<Extra
       ],
     });
 
-    const text = response.content[0]?.type === "text" ? response.content[0].text : "";
+    const textBlock = response.content.find((b) => b.type === "text");
+    const text = textBlock?.type === "text" ? textBlock.text : "";
     if (!text) {
       return fallbackBusinessData(markdown);
     }

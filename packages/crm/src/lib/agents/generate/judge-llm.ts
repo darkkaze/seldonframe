@@ -34,6 +34,7 @@ import type {
   JudgeIssue,
   JudgeResult,
 } from "@/lib/agents/generate/judge";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── model + budget ──────────────────────────────────────────────────────────
 
@@ -239,7 +240,7 @@ export function makeLlmAgentGrader(
       ].join("\n\n");
 
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: JUDGE_MAX_TOKENS,
         system,
         messages: [{ role: "user", content: userContent }],

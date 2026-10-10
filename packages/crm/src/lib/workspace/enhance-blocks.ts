@@ -62,6 +62,7 @@ import {
 import { getBookingIntakeFieldsForArchetype } from "./booking-intake-fields";
 import type { LandingPageSection } from "@/components/landing/sections/types";
 import type { OrgTheme } from "@/lib/theme/types";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── Public input + output ──────────────────────────────────────────────────
 
@@ -720,7 +721,7 @@ async function enhanceSection(
 ): Promise<{ name: SectionName; payload: Record<string, unknown> | null }> {
   try {
     const response = await client.messages.create({
-      model,
+      model: resolveModel(model),
       max_tokens: 2048,
       system: [
         {
@@ -839,7 +840,7 @@ async function callClaude(
   for (const model of models) {
     try {
       const response = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: 8192,
         messages: [{ role: "user", content: prompt }],
       });

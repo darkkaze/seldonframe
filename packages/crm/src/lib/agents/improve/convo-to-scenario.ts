@@ -57,6 +57,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/ai/client";
 import type { EvalScenario } from "@/lib/agents/evals/eval-types";
 import type { ConversationSample } from "@/lib/agents/improve/source-conversations";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── the fixed validator -> mustNotDo prohibition map ───────────────────
 //
@@ -368,7 +369,7 @@ export function makeLlmConvoScenarioConverter(
       const userContent = `Transcript:\n${renderSampleTranscript(sample)}`;
 
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: CONVERTER_MAX_TOKENS,
         system: CONVERTER_SYSTEM,
         messages: [{ role: "user", content: userContent }],

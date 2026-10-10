@@ -72,6 +72,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/ai/client";
 import type { AgentBlueprint } from "@/db/schema/agents";
 import type { FailureCluster } from "./cluster-failures";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── validateProposedPatch (PURE guardrail) ───────────────────────────────
 
@@ -274,7 +275,7 @@ export function makeLlmPatchProposer(
       ].join("\n");
 
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: PROPOSER_MAX_TOKENS,
         system: PROPOSER_SYSTEM,
         messages: [{ role: "user", content: userContent }],

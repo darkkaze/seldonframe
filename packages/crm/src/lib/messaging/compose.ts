@@ -30,6 +30,7 @@ import {
 // with the customer's name + booking time + business name slotted in.
 // Once an Anthropic key is set, the LLM path takes over automatically.
 import { renderTemplateMessage } from "./compose-template";
+import { resolveModel } from "@/lib/ai/models";
 
 export type ComposeInput = {
   orgId: string;
@@ -121,7 +122,7 @@ export async function composeOutboundMessage(
   let response: Anthropic.Messages.Message;
   try {
     response = await ai.client.messages.create({
-      model: "claude-sonnet-4-5",
+      model: resolveModel("claude-sonnet-4-5"),
       max_tokens: input.channel === "sms" ? 400 : 1200,
       system:
         "You are composing a single transactional message for a customer of a small business. " +

@@ -40,6 +40,7 @@ import { soulContextBlock } from "@/lib/agents/generate/author-context";
 import { TOOL_CATALOG } from "@/lib/agents/generate/tool-catalog";
 import { KNOWN_EVENTS } from "@/lib/agents/triggers/agent-trigger";
 import { STARTER_TEMPLATES } from "@/lib/agent-templates/starter-pack";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── model + budget ──────────────────────────────────────────────────────────
 
@@ -242,7 +243,7 @@ export function makeLlmAgentAuthor(
 
     try {
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: AUTHOR_MAX_TOKENS,
         system,
         messages: [{ role: "user", content: text }],

@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { generateSoulFallback } from "@/lib/soul/fallback";
 import type { OrgSoul, SoulWizardInput } from "@/lib/soul/types";
+import { resolveModel } from "@/lib/ai/models";
 
 function parseSoulJson(content: string) {
   const start = content.indexOf("{");
@@ -32,7 +33,7 @@ export async function generateSoul(input: SoulWizardInput): Promise<OrgSoul> {
 
   try {
     const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-latest",
+      model: resolveModel("claude-3-5-sonnet-latest"),
       max_tokens: 3000,
       messages: [{ role: "user", content: prompt }],
     });

@@ -25,6 +25,7 @@ import {
   type ServicePhoto,
 } from "./service-photo-resolver";
 import { resolveExternalMedia } from "@/lib/media/resolve-url";
+import { resolveModel } from "@/lib/ai/models";
 
 // Prefer a smaller model for payload generation — the prompt is highly
 // structured (JSON schema is fully specified), so Haiku is sufficient
@@ -274,7 +275,7 @@ export async function generateR1Payload(args: {
   let response: { content: Array<AnthropicContentBlock>; stop_reason?: string };
   try {
     response = await client.messages.create({
-      model: modelInUse,
+      model: resolveModel(modelInUse),
       max_tokens: MAX_TOKENS,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],

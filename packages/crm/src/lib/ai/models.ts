@@ -17,3 +17,13 @@
  * `ANTHROPIC_MODEL`); this constant only supplies the fallback default.
  */
 export const DEFAULT_SONNET_MODEL = "claude-sonnet-4-5-20250929";
+
+/**
+ * Model id actually sent to the LLM provider. When `LLM_MODEL` is set, every
+ * call uses it instead of the model the caller requested — this is how the app
+ * runs on an Anthropic-compatible provider (e.g. MiniMax via
+ * `ANTHROPIC_BASE_URL`) whose model ids differ from Claude's.
+ */
+export function resolveModel(requested: string): string {
+  return process.env.LLM_MODEL?.trim() || requested;
+}

@@ -46,6 +46,7 @@ import {
   capErrorText,
   type LooseMessage,
 } from "./turn-token-economy";
+import { resolveModel } from "@/lib/ai/models";
 
 // Mirror runtime.ts exactly so a template test behaves like the live agent.
 const MODEL =
@@ -326,7 +327,7 @@ export async function runStatelessAgentTurn(
       // block makes iteration N+1's growing prefix a cache READ instead of
       // full-price input. Three markers total (≤ the API's limit of 4).
       response = await input.client.messages.create({
-        model: turnModel,
+        model: resolveModel(turnModel),
         max_tokens: input.maxTokensOverride ?? MAX_TOKENS,
         system: cachedSystemBlocks(systemPrompt) as Anthropic.Messages.MessageCreateParams["system"],
         tools: cachedToolParams(

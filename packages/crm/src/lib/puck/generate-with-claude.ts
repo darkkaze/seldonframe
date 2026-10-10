@@ -13,6 +13,7 @@ import {
   type PuckPayload,
   type PuckValidationIssue,
 } from "./validator";
+import { resolveModel } from "@/lib/ai/models";
 
 // Claude generation path — alternate to the existing Puck Cloud AI
 // generator at lib/puck/generate-page.ts. The Claude path exists so
@@ -133,7 +134,7 @@ ${schemaSummary}${existingBlock}`;
 
   try {
     const response = await resolution.client.messages.create({
-      model: "claude-opus-4-7",
+      model: resolveModel("claude-opus-4-7"),
       max_tokens: 8192,
       thinking: { type: "adaptive" },
       system,

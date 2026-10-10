@@ -8,6 +8,7 @@ import { brainCompilationRuns, brainEvents } from "@/db/schema";
 import { proposeBlockRewrite, type BlockRewriteSuggestion } from "@/lib/brain";
 import { getBrainHealthSummary } from "@/lib/brain-health";
 import { regenerateBrainManifestForWorkspace } from "@/lib/brain-manifest";
+import { resolveModel } from "@/lib/ai/models";
 
 const BRAIN_ROOT = process.env.VERCEL ? "/tmp/brain" : path.join(process.cwd(), ".brain");
 const BRAIN_WIKI_ROOT = path.join(BRAIN_ROOT, "wiki");
@@ -210,7 +211,7 @@ async function compileWorkspaceSummaryWithHaiku(workspaceId: string, events: Bra
   }
 
   const response = await client.messages.create({
-    model: COMPILER_MODEL,
+    model: resolveModel(COMPILER_MODEL),
     max_tokens: 1200,
     system: "You are the Seldon Brain workspace compiler. Produce concise markdown with YAML frontmatter and Obsidian links when relevant.",
     messages: [
@@ -244,7 +245,7 @@ async function compileDreamPromotionWithHaiku(workspaceId: string, events: Brain
 
   try {
     const response = await client.messages.create({
-      model: COMPILER_MODEL,
+      model: resolveModel(COMPILER_MODEL),
       max_tokens: 1200,
       system:
         "You are the Seldon Brain dream-cycle engine. Convert anonymized episodic events into compact promotions for semantic and personal memory. Prefer specific, actionable business patterns tied to revenue, conversion, retention, or workflow efficiency. Avoid generic taxonomy labels or broad category names unless the event stream shows repeated, decision-useful evidence. Return strict JSON only.",

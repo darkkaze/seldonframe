@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { organizations } from "@/db/schema";
 import { getAIClient } from "@/lib/ai/client";
 import { writeEvent } from "@/lib/brain";
+import { resolveModel } from "@/lib/ai/models";
 
 /**
  * A VerticalPack is a SeldonFrame "skill pack" — a complete, vertical-specific
@@ -464,7 +465,7 @@ export async function generateVerticalPack(input: GenerateVerticalPackInput): Pr
   ].join("\n\n");
 
   const response = await resolution.client.messages.create({
-    model: process.env.VERTICAL_PACK_MODEL?.trim() || "claude-sonnet-4-6",
+    model: resolveModel(process.env.VERTICAL_PACK_MODEL?.trim() || "claude-sonnet-4-6"),
     max_tokens: 4000,
     temperature: 0.2,
     system: GENERATOR_SYSTEM_PROMPT,

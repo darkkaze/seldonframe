@@ -33,6 +33,7 @@ import {
 } from "./r1-site-tree";
 import { buildServicePagesPrompt } from "./service-pages-prompt";
 import { resolveServicePhoto, type ServicePhoto } from "./service-photo-resolver";
+import { resolveModel } from "@/lib/ai/models";
 
 // ── Model selection ──────────────────────────────────────────────────────────
 
@@ -167,7 +168,7 @@ export async function generateServicePages(
   let rawResponse: { content: Array<AnthropicContentBlock>; stop_reason?: string };
   try {
     rawResponse = await client.messages.create({
-      model: modelInUse,
+      model: resolveModel(modelInUse),
       max_tokens: MAX_TOKENS,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: userMessage }],

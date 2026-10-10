@@ -51,6 +51,7 @@
 
 import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/ai/client";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── the 7-mode taxonomy ──────────────────────────────────────────────────
 
@@ -352,7 +353,7 @@ export function makeLlmFailureClusterer(
       ].join("\n");
 
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: CLUSTERER_MAX_TOKENS,
         system: CLUSTERER_SYSTEM,
         messages: [{ role: "user", content: userContent }],

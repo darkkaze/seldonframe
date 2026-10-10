@@ -11,6 +11,7 @@
 // action or server component.
 
 import type { SentEmailSample, VoiceIngestDeps } from "./ingest-sent-mail";
+import { resolveModel } from "@/lib/ai/models";
 
 /** ONE LLM call that distills sample sent emails into a compact markdown
  *  style profile. Never receives full bodies (the caller already truncated
@@ -30,7 +31,7 @@ async function distillVoiceProfile(
     .join("\n\n");
 
   const res = await client.messages.create({
-    model: process.env.ANTHROPIC_AGENT_MODEL?.trim() || "claude-sonnet-4-5-20250929",
+    model: resolveModel(process.env.ANTHROPIC_AGENT_MODEL?.trim() || "claude-sonnet-4-5-20250929"),
     max_tokens: 600,
     system:
       "You distill an operator's writing voice from sample sent emails into a compact markdown style profile for another AI to imitate when drafting emails on their behalf. " +

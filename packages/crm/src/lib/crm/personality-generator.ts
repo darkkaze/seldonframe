@@ -53,6 +53,7 @@ import {
   type CRMPersonality,
   type PersonalityVertical,
 } from "./personality";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── Input + output ──────────────────────────────────────────────────────────
 
@@ -390,7 +391,7 @@ async function callAnthropic(
   try {
     const anthropic = new Anthropic({ apiKey });
     const response = await anthropic.messages.create({
-      model,
+      model: resolveModel(model),
       max_tokens: 4096,
       messages: [{ role: "user", content: prompt }],
     });

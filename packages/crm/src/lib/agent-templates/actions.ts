@@ -36,6 +36,7 @@ import {
   buildDefaultInstantiateDeps,
 } from "./starter-pack";
 import { resolveStudioBuildGate, NEEDS_BYOK_MESSAGE } from "./studio-build-gate";
+import { resolveModel } from "@/lib/ai/models";
 
 export type CreateAgentTemplateResult =
   | { ok: true; id: string }
@@ -244,7 +245,7 @@ export async function generateAgentDraftAction(input: {
     {
       complete: async ({ system, user }) => {
         const resp = await client.messages.create({
-          model: GEN_MODEL,
+          model: resolveModel(GEN_MODEL),
           max_tokens: 2048,
           system,
           messages: [{ role: "user", content: user }],

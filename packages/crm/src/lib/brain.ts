@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/db";
 import { brainEvents } from "@/db/schema";
+import { resolveModel } from "@/lib/ai/models";
 
 export type BrainEventType =
   | "workspace_created"
@@ -160,7 +161,7 @@ export async function calculateSalienceScore(eventType: string, payload: Record<
 
   try {
     const response = await client.messages.create({
-      model: SALIENCE_MODEL,
+      model: resolveModel(SALIENCE_MODEL),
       max_tokens: 12,
       temperature: 0,
       system:

@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { createByokAnthropicClient } from "./anthropic";
 import { readSkillPack } from "@/lib/skill-packs/reader";
-import { DEFAULT_SONNET_MODEL } from "@/lib/ai/models";
+import { DEFAULT_SONNET_MODEL, resolveModel } from "@/lib/ai/models";
 
 const SKILL_PACK_PATH = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -104,7 +104,7 @@ export async function rankUrlsForFaqRelevance(args: SitemapPriorityArgs): Promis
     .replace("{{URL_LIST}}", urls.map((u, i) => `${i + 1}. ${u}`).join("\n"));
 
   const response = await client.messages.create({
-    model: MODEL,
+    model: resolveModel(MODEL),
     max_tokens: MAX_TOKENS,
     messages: [{ role: "user", content: userMessage }],
   });

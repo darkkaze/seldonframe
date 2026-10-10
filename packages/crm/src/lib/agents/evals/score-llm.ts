@@ -29,6 +29,7 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { getAnthropicClient } from "@/lib/ai/client";
 import type { EvalGrader } from "./score";
 import type { EvalScenario, EvalTranscript, EvalTurn } from "./eval-types";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── model + budget ──────────────────────────────────────────────────────────
 
@@ -200,7 +201,7 @@ export function makeLlmEvalGrader(
       ].join("\n\n");
 
       const resp = await client.messages.create({
-        model,
+        model: resolveModel(model),
         max_tokens: EVAL_MAX_TOKENS,
         system: GRADER_SYSTEM,
         messages: [{ role: "user", content: userContent }],

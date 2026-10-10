@@ -15,6 +15,7 @@ import { getAIClient } from "@/lib/ai/client";
 import type { TasteGrounding } from "@/db/schema/agent-taste-sessions";
 import { truncateGroundingToCap } from "./taste-session-store";
 import { TASTE_MODEL, TASTE_EXTRACT_MAX_TOKENS, TASTE_EXTRACT_INPUT_CHARS } from "./taste-policy";
+import { resolveModel } from "@/lib/ai/models";
 
 export type GroundOutcome =
   | { ok: true; grounding: TasteGrounding }
@@ -87,7 +88,7 @@ export async function groundOnBusiness(
   let extracted: Partial<TasteGrounding> = {};
   try {
     const msg = await resolution.client.messages.create({
-      model: TASTE_MODEL,
+      model: resolveModel(TASTE_MODEL),
       max_tokens: TASTE_EXTRACT_MAX_TOKENS,
       system: EXTRACT_SYSTEM,
       messages: [{ role: "user", content: page.markdown.slice(0, TASTE_EXTRACT_INPUT_CHARS) }],

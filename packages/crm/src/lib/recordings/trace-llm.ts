@@ -8,6 +8,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import type { TraceLlm, TraceLlmRequest } from "./trace-schema";
+import { resolveModel } from "@/lib/ai/models";
 
 const TRACE_LLM_MODEL = process.env.TRACE_LLM_MODEL?.trim() || "claude-opus-4-7";
 
@@ -69,7 +70,7 @@ export function makeAnthropicTraceLlm(params: { apiKey: string }): TraceLlm {
 
   return async (req: TraceLlmRequest): Promise<unknown> => {
     const response = await client.messages.create({
-      model: TRACE_LLM_MODEL,
+      model: resolveModel(TRACE_LLM_MODEL),
       max_tokens: req.maxTokens,
       thinking: { type: "adaptive" },
       system: req.system,

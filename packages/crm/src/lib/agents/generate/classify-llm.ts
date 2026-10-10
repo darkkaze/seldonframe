@@ -22,6 +22,7 @@
 
 import type { AgentIntent } from "@/lib/agents/generate/agent-bundle";
 import { getAnthropicClient } from "@/lib/ai/client";
+import { resolveModel } from "@/lib/ai/models";
 
 // ─── model + budget ──────────────────────────────────────────────────────────
 
@@ -85,7 +86,7 @@ export async function llmClassify(
 
   try {
     const resp = await client.messages.create({
-      model,
+      model: resolveModel(model),
       max_tokens: CLASSIFY_MAX_TOKENS,
       system,
       messages: [{ role: "user", content: text }],

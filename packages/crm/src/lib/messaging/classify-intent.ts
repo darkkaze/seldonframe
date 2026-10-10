@@ -17,6 +17,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { getAIClient } from "@/lib/ai/client";
 import { logEvent } from "@/lib/observability/log";
+import { resolveModel } from "@/lib/ai/models";
 
 export type InboundIntent = "faq" | "pricing" | "scheduling" | "other";
 
@@ -73,7 +74,7 @@ export async function classifyInboundIntent(params: {
 
   try {
     const response = await client.messages.create({
-      model: "claude-sonnet-4-5",
+      model: resolveModel("claude-sonnet-4-5"),
       max_tokens: 16,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: sample }],

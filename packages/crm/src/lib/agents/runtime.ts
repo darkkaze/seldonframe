@@ -61,6 +61,7 @@ import { bindingToCtxBooking } from "@/lib/agents/booking/binding-ctx";
 import { captureLlmGeneration } from "@/lib/analytics/llm-capture";
 import { VOICE_PROFILE_NOTE_PATH } from "@/lib/agents/voice-profile/ingest-sent-mail";
 import { buildTurnMessages, type TurnMessage } from "@/lib/agents/turn-messages";
+import { resolveModel } from "@/lib/ai/models";
 
 const MODEL = process.env.ANTHROPIC_AGENT_MODEL?.trim() || "claude-sonnet-4-5-20250929";
 const MAX_TURN_ITERATIONS = 6; // tool-call cap per single turn (catches loops)
@@ -468,7 +469,7 @@ export async function executeTurn(input: {
       // next loop iteration and the NEXT TURN's history rebuild a cache READ
       // instead of full-price input. Three markers total (≤ the API's 4).
       response = await anthropic.messages.create({
-        model: turnModel,
+        model: resolveModel(turnModel),
         max_tokens: 1024,
         system: cachedSystemBlocks(systemPrompt) as Anthropic.Messages.MessageCreateParams["system"],
         tools: cachedToolParams(
@@ -751,7 +752,7 @@ export async function executeTurn(input: {
       });
       lastModelUsed = regenModel;
       const regenResponse = await anthropic.messages.create({
-        model: regenModel,
+        model: resolveModel(regenModel),
         max_tokens: 512,
         // Deliberately UNCACHED (token economy): this call has no tools, so
         // its prefix can never match the loop's cached [tools, system, …]

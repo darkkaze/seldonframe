@@ -44,6 +44,7 @@ import { firecrawlScrape, type ScrapeDeps } from "./firecrawl-scrape";
 import { harvestImagesFromHtml } from "./html-image-harvester";
 import { WebFetchError, type WebFetchErrorReason } from "./web-fetch-extractor";
 import { findContactPageCandidates } from "./contact-page-candidates";
+import { resolveModel } from "@/lib/ai/models";
 
 // Re-export the error type so callers can import it from either path
 // during the cutover period without breaking.
@@ -122,7 +123,7 @@ async function runExtractionOnce(args: {
   let response: { content: Array<AnthropicContentBlock>; stop_reason?: string };
   try {
     response = await client.messages.create({
-      model,
+      model: resolveModel(model),
       max_tokens: MAX_TOKENS,
       // Static across every call for this deployment (same SYSTEM_PROMPT
       // string every time) — hoisted into a cached `system` array entry
