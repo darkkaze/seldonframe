@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import posthog from "posthog-js";
 import { sendMagicLinkAction } from "./actions";
 import { googleSignInAction } from "../oauth-actions";
+import { signupAction } from "@/lib/auth/actions";
 import { DEMO_BLOCK_MESSAGE } from "@/lib/demo/constants";
 import { useDemoToast } from "@/components/shared/demo-toast-provider";
 import { HEAR_ABOUT_OPTIONS, normalizeHearAbout } from "@/lib/analytics/signup-attribution";
@@ -18,6 +19,7 @@ export function SignupForm({
 }) {
   const { showDemoToast } = useDemoToast();
   const [state, action, pending] = useActionState(sendMagicLinkAction, {});
+  const [passwordState, passwordAction, passwordPending] = useActionState(signupAction, {});
   // 2026-08-23 — optional attribution question ("make the next wave
   // attributable"). Analytics-only: the answer is captured straight to
   // PostHog on the ANONYMOUS person ($set_once hear_about) the moment
@@ -38,6 +40,14 @@ export function SignupForm({
       showDemoToast();
     }
   }, [showDemoToast, state.error]);
+
+  // signupAction signs the new user in without redirecting; a full page load
+  // picks up the fresh session cookie.
+  useEffect(() => {
+    if (passwordState.success) {
+      window.location.assign(callbackUrl);
+    }
+  }, [passwordState.success, callbackUrl]);
 
   return (
     <div className="space-y-5 text-foreground">
@@ -87,6 +97,78 @@ export function SignupForm({
         </>
       ) : null}
 
+      <form action={passwordAction} className="space-y-3">
+        <div className="space-y-1">
+          <label htmlFor="signup-name" className="text-label text-foreground">
+            Your name
+          </label>
+          <input
+            id="signup-name"
+            name="name"
+            type="text"
+            required
+            autoComplete="name"
+            className="crm-input h-10 w-full px-3"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="signup-org" className="text-label text-foreground">
+            Company name
+          </label>
+          <input
+            id="signup-org"
+            name="orgName"
+            type="text"
+            required
+            autoComplete="organization"
+            className="crm-input h-10 w-full px-3"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="signup-email" className="text-label text-foreground">
+            Email
+          </label>
+          <input
+            id="signup-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="you@company.com"
+            className="crm-input h-10 w-full px-3"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="signup-password" className="text-label text-foreground">
+            Password (min. 8 characters)
+          </label>
+          <input
+            id="signup-password"
+            name="password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            className="crm-input h-10 w-full px-3"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={passwordPending}
+          className={googleEnabled ? "crm-button-secondary h-10 w-full px-4" : "crm-button-primary h-10 w-full px-4"}
+        >
+          {passwordPending ? "Creating account..." : "Create account"}
+        </button>
+        {passwordState.error ? <p role="alert" className="text-sm text-destructive">{passwordState.error}</p> : null}
+      </form>
+
+      <div className="flex items-center gap-3 text-xs text-[hsl(var(--color-text-secondary))]">
+        <span className="h-px flex-1 bg-border" />
+        or
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
       <form action={action} className="space-y-3">
         <input type="hidden" name="redirectTo" value={callbackUrl} />
         <div className="space-y-1">
@@ -107,7 +189,7 @@ export function SignupForm({
         <button
           type="submit"
           disabled={pending}
-          className={googleEnabled ? "crm-button-secondary h-10 w-full px-4" : "crm-button-primary h-10 w-full px-4"}
+          className="crm-button-secondary h-10 w-full px-4"
         >
           {pending ? "Sending magic link..." : "Continue with email link"}
         </button>

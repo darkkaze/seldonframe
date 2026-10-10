@@ -1,4 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
+import bcrypt from "bcryptjs";
+import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import Resend from "next-auth/providers/resend";
 import { db } from "@/db";
@@ -209,6 +211,41 @@ if (resendApiKey) {
     })
   );
 }
+
+// Email + password sign-in against users.passwordHash (set by signupAction).
+// Users created through Google or the magic link have no password hash and
+// cannot sign in this way.
+authProviders.push(
+  Credentials({
+    credentials: {
+      email: { type: "email" },
+      password: { type: "password" },
+    },
+    async authorize(credentials) {
+      const email = String(credentials?.email ?? "").trim().toLowerCase();
+      const password = String(credentials?.password ?? "");
+      if (!email || !password) return null;
+
+      const [user] = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          orgId: users.orgId,
+          role: users.role,
+          passwordHash: users.passwordHash,
+        })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      if (!user?.passwordHash) return null;
+      if (!(await bcrypt.compare(password, user.passwordHash))) return null;
+
+      return { id: user.id, name: user.name, email: user.email, orgId: user.orgId, role: user.role };
+    },
+  })
+);
 
 export const authConfig = {
   pages: {

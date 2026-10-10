@@ -7,13 +7,15 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { organizations, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { AuthError } from "next-auth";
 import { signIn, signOut } from "@/auth";
 import { assertWritable } from "@/lib/demo/server";
 import { OPERATOR_SESSION_COOKIE } from "@/lib/operator-portal/session";
+import { isSafeInternalRedirect } from "@/lib/auth/signup-redirect";
 
 const signupSchema = z.object({
   name: z.string().min(2),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   password: z.string().min(8),
   orgName: z.string().min(2),
 });
@@ -171,6 +173,40 @@ export async function signupAction(_: AuthActionState, formData: FormData): Prom
   } catch {
     return { error: "Could not create your account right now. Please try again." };
   }
+}
+
+const passwordSignInSchema = z.object({
+  email: z.string().trim().toLowerCase().email(),
+  password: z.string().min(1),
+});
+
+export async function passwordSignInAction(_: AuthActionState, formData: FormData): Promise<AuthActionState> {
+  const parsed = passwordSignInSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!parsed.success) {
+    return { error: "Enter your email and password." };
+  }
+
+  const redirectTo = formData.get("redirectTo");
+
+  try {
+    await signIn("credentials", {
+      email: parsed.data.email,
+      password: parsed.data.password,
+      redirectTo: isSafeInternalRedirect(redirectTo) ? (redirectTo as string).trim() : "/dashboard",
+    });
+  } catch (error) {
+    // A successful sign-in throws NEXT_REDIRECT, which must propagate.
+    if (error instanceof AuthError) {
+      return { error: "Invalid email or password." };
+    }
+    throw error;
+  }
+
+  return { success: true };
 }
 
 // ─── unified signout ────────────────────────────────────────────────────

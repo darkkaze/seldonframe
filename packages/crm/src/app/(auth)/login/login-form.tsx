@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { sendMagicLinkAction } from "./actions";
 import { googleSignInAction } from "../oauth-actions";
+import { passwordSignInAction } from "@/lib/auth/actions";
 import { DEMO_BLOCK_MESSAGE } from "@/lib/demo/constants";
 import { useDemoToast } from "@/components/shared/demo-toast-provider";
 
@@ -16,6 +17,7 @@ export function LoginForm({
 }) {
   const { showDemoToast } = useDemoToast();
   const [state, action, pending] = useActionState(sendMagicLinkAction, {});
+  const [passwordState, passwordAction, passwordPending] = useActionState(passwordSignInAction, {});
 
   useEffect(() => {
     if (state.error === DEMO_BLOCK_MESSAGE) {
@@ -49,6 +51,52 @@ export function LoginForm({
         </>
       ) : null}
 
+      <form action={passwordAction} className="space-y-3">
+        {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
+        <div className="space-y-1">
+          <label htmlFor="password-email" className="text-label text-foreground">
+            Email
+          </label>
+          <input
+            id="password-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="you@company.com"
+            className="crm-input h-10 w-full px-3"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="password" className="text-label text-foreground">
+            Password
+          </label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            autoComplete="current-password"
+            className="crm-input h-10 w-full px-3"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={passwordPending}
+          className={googleEnabled ? "crm-button-secondary h-10 w-full px-4" : "crm-button-primary h-10 w-full px-4"}
+        >
+          {passwordPending ? "Signing in..." : "Sign in with password"}
+        </button>
+        {passwordState.error ? <p className="text-sm text-destructive">{passwordState.error}</p> : null}
+      </form>
+
+      <div className="flex items-center gap-3 text-xs text-[hsl(var(--color-text-secondary))]">
+        <span className="h-px flex-1 bg-border" />
+        or
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
       <form action={action} className="space-y-3">
         {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
         <div className="space-y-1">
@@ -69,7 +117,7 @@ export function LoginForm({
         <button
           type="submit"
           disabled={pending}
-          className={googleEnabled ? "crm-button-secondary h-10 w-full px-4" : "crm-button-primary h-10 w-full px-4"}
+          className="crm-button-secondary h-10 w-full px-4"
         >
           {pending ? "Sending magic link..." : "Continue with email"}
         </button>
